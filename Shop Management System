@@ -1,0 +1,844 @@
+from tkinter import *
+import mysql.connector
+import tkinter.messagebox as msg
+import datetime as dt
+import sys
+from subprocess import call
+from Login_Module import *
+
+
+Shree_Cmt_Rate = 0 
+Roofoon_Cmt_Rate =0
+Chhar_Rate = 0 
+Gitti_Rate =0 
+Konark_Cmt_Rate = 0
+Ring_Rate = 0
+Wire_Rate = 0
+
+# Users Account
+global userName
+userName = str(sys.argv[1])   
+
+if userName == "":
+
+    yesNo= msg.askquestion('Error!','Please Login to Use Services.\n Do You Want To Login? ')
+    if yesNo == 'no':
+        sys.exit()
+    else:
+
+        pass
+
+
+oldRate = Shree_Cmt_Rate
+
+try:
+    myDb = mysql.connector.connect(host='localhost',
+        user= 'abhi',
+        password = 'Abhi@3205',
+        database = 'dB2')
+    cur = myDb.cursor()
+
+except:
+    msg.showinfo('Error 504','Server is not Responding \nPlease Contact Developer!')
+
+
+def pullOutRates():
+    global Shree_Cmt_Rate,Roofoon_Cmt_Rate,Chhar_Rate,Gitti_Rate,Konark_Cmt_Rate,Ring_Rate,Wire_Rate 
+    stmt = "SELECT * FROM CementRates"
+    cur.execute(stmt)
+    rates = cur.fetchall()
+    for rate in rates:
+        Shree_Cmt_Rate = rate[0]
+        Roofoon_Cmt_Rate  = rate[1]
+        Chhar_Rate = rate[2]
+        Gitti_Rate = rate[3]
+        Konark_Cmt_Rate = rate[4]
+        Ring_Rate = rate[5]
+        Wire_Rate = rate[6]
+
+def dateTime():
+    date_t = dt.datetime.now()
+    return str((date_t.strftime("%d-%m-%Y (%H : %M)")))
+
+root = Tk()
+root.geometry("1450x750")
+root.title("Ganpati Traders Cement Store Pvt Lmt Naubatpur Patna")
+root.configure(background="lightpink")
+
+def addNew():
+
+    global Customer_Name,customerPh,Shree_Cmt,Roofon_Cmt,Chhar,Gitti,Pre_Paid,fl1
+    Customer_Name.set("")
+    customer_Ph.set(0)
+    Shree_Cmt.set(0)
+    Roofon_Cmt.set(0)
+    Konark_Cmt.set(0)
+    Chhar.set(0.0)
+    Gitti.set(0.0)
+    ring.set(0.0)
+    wire.set(0.0)
+    Pre_Paid.set(0.0)
+    fl1 = 0
+    msg.showinfo("Current Status Of Rate Confirm It",f"Shree Cement Rate: {Shree_Cmt_Rate} \n\n "
+                                              f"Roofon Cement Rate: {Roofoon_Cmt_Rate} \n\n"
+                                              f"Konark Cement Rate: {Konark_Cmt_Rate}\n\n"
+                                              f"Chhar Rate: {Chhar_Rate} \n\n"
+                                              f"Gitti Rate: {Gitti_Rate}\n\n"
+                                              f"Ring Rate: {Ring_Rate}\n\n"
+                                              f"Wire Rate: {Wire_Rate}")
+
+    Label(root,text="").grid()
+    Label(root,text='Customer Name:  ',font="helvetica 20 bold").grid(row=2,pady=10)
+    cutomerEnt = Entry(root,textvariable=Customer_Name,font="arial 20 bold").grid(row=2,column=2,pady=10,padx=30)
+
+
+    Label(root, text='Customer Phone No:  ', font="helvetica 20 bold").grid(row=2,column =5, pady=10,padx=50)
+    custPHEnt=Entry(root,textvariable=customer_Ph,font="arial 20 bold").grid(row=2, column=6,pady=10)
+
+    Label(root, text='Chhar (/Kg):  ', font="helvetica 20 bold").grid(row=3, column=5, pady=10, padx=50)
+    char = Entry(root,textvariable = Chhar,font="arial 20 bold").grid(row=3,column=6,pady=10)
+
+    Label(root, text='Ring (/kg):  ', font="helvetica 20 bold").grid(row=4, column=5, pady=10, padx=50)
+    char10 = Entry(root, textvariable=ring, font="arial 20 bold").grid(row=4, column=6, pady=10)
+
+    Label(root, text='Wire (/kg):  ', font="helvetica 20 bold").grid(row=5, column=5, pady=10, padx=50)
+    char12 = Entry(root, textvariable=wire, font="arial 20 bold").grid(row=5, column=6, pady=10)
+
+    Label(root, text='Shree Cement:  ',font="helvetica 20 bold").grid(row=3,pady=10)
+    ShreeEnt = Entry(root,textvariable = Shree_Cmt,font="arial 20 bold").grid(row=3,column=2,pady=10)
+
+    Label(root, text='Roofon Cement:  ', font="helvetica 20 bold").grid(row=4, pady=10)
+    RoofonEnt = Entry(root, textvariable=Roofon_Cmt, font="arial 20 bold").grid(row=4, column=2, pady=10)
+
+    Label(root, text='Konark Cement:  ', font="helvetica 20 bold").grid(row=5, pady=10)
+    KorarkEnt = Entry(root, textvariable=Konark_Cmt, font="arial 20 bold").grid(row=5, column=2, pady=10)
+
+    Label(root, text='Gitti (/tiller):  ', font="helvetica 20 bold").grid(row=6, pady=10)
+    GittiEnt = Entry(root, textvariable=Gitti, font="arial 20 bold").grid(row=6, column=2, pady=10)
+
+    Label(root, text='Pre-Paid Amount:  ', font="helvetica 20 bold").grid(row=7, pady=10)
+    Pre_PaidEnt = Entry(root, textvariable=Pre_Paid, font="arial 20 bold").grid(row=7, column=2, pady=10)
+
+    #Save Button
+    Button(root,text="Save Record",font="comicsansms 20 bold",bg='green',fg='white',command=insertToDatabase).grid(row=8,pady=20)
+
+    Button(root,text="Update New Rates",font="comicsansms 20 bold",bg='yellow',fg='purple',command=fixRates).grid(row=10,pady=20,padx=10)
+
+
+def totalBillDueAmt():
+    new = Toplevel()
+    new.geometry('1500x1200')
+    new.title("Customers Total Bill / Pre-Paid / Due Amount ")
+    listbox = Listbox(new, font="helvetica 20 bold", bg='lightblue', relief=SUNKEN,
+                      height=100, width=500)
+    listbox.pack(fill='both')
+    stmt = "SELECT ID,Customer_Name,TOTAL_BILL,Pre_Paid,Due_Amount,Customer_Ph from ShopRecord"
+    cur.execute(stmt)
+    record = cur.fetchall()
+    dummy = []
+    for datt in record:
+        dummy.append(datt)
+    siz =len(dummy)
+    listbox.insert(END, "")
+
+    while siz != 0:
+        k=dummy[siz-1]
+
+        ide = k[0]
+        Customer_Name = k[1]
+        TOTAL_BILL = k[2]
+        Pre_Paid = k[3]
+        Due_Amount = k[4]
+        Customer_Ph = k[5]
+        listbox.insert(END,f"  ID: {ide}    |    {Customer_Name}    |    PhoneNo:    {Customer_Ph}    |    Total Bill: {TOTAL_BILL}    |    Pre-Paid:  {Pre_Paid}    |    Due Amount: {Due_Amount}")
+        listbox.insert(END,"")
+        listbox.insert(END,"---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
+        siz-=1
+
+
+
+def viewByID():
+    top = Toplevel()
+    top.title("Locate Customer By ID")
+    top.geometry('650x80')
+    top.configure(background='lightpink')
+    Label(top, text=' Customer ID: ', font="helvetica 20 bold").grid(row=0, pady=10, padx=10)
+    idEnt = Entry(top, textvariable=inputid, font="arial 20 bold").grid(row = 0,column=2,pady=10,padx=10)
+    Button(top,text=" OK ",font="comicsansms 20 bold",fg='white',bg='green',command=showinputid).grid(row=0,column=3)
+
+def viewAll():
+    top4 = Toplevel()
+    top4.title("Whole Customers Record List")
+    top4.geometry('1500x1200')
+    listbox=Listbox(top4,font="helvetica 18 bold",bg='lightblue',relief=SUNKEN,height=100,width=500)
+    listbox.pack(fill='both')
+
+    listbox.insert(END,"")
+    stmt = "SELECT * FROM ShopRecord"
+    cur.execute(stmt)
+    dat = cur.fetchall()
+    storage = []
+
+    for data in dat:
+        storage.append(data)
+    siz = len(storage)
+    while siz != 0:
+        recd = storage[siz-1]
+        listbox.insert(END,f"            Id:  {recd[0]}      |       Name:   {recd[1]}       |        Date/Time:    {recd[13]}           |        PhoneNo: {recd[9]}")
+        listbox.insert(END,f"")
+        listbox.insert(END,f"            Shree Cement:    {recd[2]}        |          Roofon Cement:  {recd[3]}            |          Konark Cement:  {recd[10]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"            Chhar [kg]:    {recd[4]}          |          Gitti [Tiller]: {recd[5]}            |          Ring [Kg]:  {recd[11]}         |       Wire [kg]:   {recd[12]}")
+        listbox.insert(END,f"")
+        listbox.insert(END,f"            Total Bill:   {recd[6]}           |          Pre-Paid: {recd[7]}                  |          Due Amount: {recd[8]}  ")
+        listbox.insert(END,"")
+        listbox.insert(END,"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        listbox.insert(END,"")
+
+        siz-=1
+
+
+
+def update():
+
+    top5 = Toplevel()
+    top5.title("Update Customer Record")
+    top5.geometry('900x100')
+    top5.configure(background='lightpink')
+    Label(top5, text=' Enter Customer ID for Update: ', font="helvetica 20 bold").grid(row=0, pady=10, padx=10)
+    idEnt = Entry(top5, textvariable=updateId, font="arial 20 bold").grid(row=0, column=2, pady=10, padx=10)
+    Button(top5, text=" Update ", font="comicsansms 20 bold", fg='white', bg='green', command=showBeforeUpdate).grid(row=0,
+                                                                                                           column=3)
+def showBeforeUpdate():
+    global ShreeCmt,RoofonCmt,chhar,gitti,PrePaid,KonarkCmt,newRing,newWire, fl2
+    ShreeCmt.set(0)
+    RoofonCmt.set(0)
+    KonarkCmt.set(0)
+    newRing.set(0)
+    newWire.set(0)
+    chhar.set(0.0)
+    gitti.set(0.0)
+    PrePaid.set(0.0)
+    fl2 = 0
+
+    stmt = "SELECT * from ShopRecord WHERE id={}".format(updateId.get())
+    cur.execute(stmt)
+    rec = cur.fetchall()
+    for recd in rec:
+        msg.showinfo(f"Current Status of ID No: {updateId.get()} is: ",f"Name: {recd[1]} \n"
+                                                                       f"PhoneNo: {recd[9]}\n\n"
+                                                                       f"Shree Cement: {recd[2]} \n"
+                                                                       f"Roofon Cement: {recd[3]} \n"
+                                                                       f"Konark Cement: {recd[10]}\n\n"
+                                                                       f"Chhar: {recd[4]}\n"
+                                                                       f"Gitti: {recd[5]} \n"
+                                                                       f"Ring: {recd[11]}\n"
+                                                                       f"Wire: {recd[12]}\n"
+                                                                       f"-----------------------\n"
+                                                                      f"Total Bill: {recd[6]} \n"
+                                                                      f"Pre-Paid Amount: {recd[7]} \n"
+                                                                      f"Due Amount: {recd[8]} \n")
+    top6 = Toplevel()
+    top6.title(f"Update Record of ID: {updateId.get()}")
+    top6.geometry("800x550")
+    top6.configure(background='lightpink')
+
+    Label(top6, text='Shree Cement (+):  ', font="helvetica 20 bold").grid(row=3, pady=10)
+    ShreeEnt = Entry(top6, textvariable=ShreeCmt, font="arial 20 bold").grid(row=3, column=2, pady=10)
+
+    Label(top6, text='Roofon Cement (+):  ', font="helvetica 20 bold").grid(row=4, pady=10)
+    RoofonEnt = Entry(top6, textvariable=RoofonCmt, font="arial 20 bold").grid(row=4, column=2, pady=10)
+
+    Label(top6, text='Konark Cement (+):  ', font="helvetica 20 bold").grid(row=5, pady=10)
+    ChharEnt = Entry(top6, textvariable=KonarkCmt, font="arial 20 bold").grid(row=5, column=2, pady=10)
+
+    Label(top6, text='Chhar (Kg +):  ', font="helvetica 20 bold").grid(row=6, pady=10)
+    GittiEnt = Entry(top6, textvariable=chhar, font="arial 20 bold").grid(row=6, column=2, pady=10)
+
+    Label(top6, text='Gitti (tiller +)', font="helvetica 20 bold").grid(row=7, pady=10)
+    GittiEnt = Entry(top6, textvariable=gitti, font="arial 20 bold").grid(row=7, column=2, pady=10)
+
+    Label(top6, text='Ring (kg +):  ', font="helvetica 20 bold").grid(row=8, pady=10)
+    GittiEnt = Entry(top6, textvariable=newRing, font="arial 20 bold").grid(row=8, column=2, pady=10)
+
+    Label(top6, text='Wire (kg +):  ', font="helvetica 20 bold").grid(row=9, pady=10)
+    GittiEnt = Entry(top6, textvariable=newWire, font="arial 20 bold").grid(row=9, column=2, pady=10)
+
+    Label(top6, text='Pre-Paid Amt (Rupees +):  ', font="helvetica 20 bold").grid(row=10, pady=10)
+    Pre_PaidEnt = Entry(top6, textvariable=PrePaid, font="arial 20 bold").grid(row=10, column=2, pady=10)
+
+
+    Button(top6,text="Update",font='comicsansms 17 bold',bg='green',fg='white',command=nowUpdate).grid(row=11,pady=10)
+
+def nowUpdate():
+    global fl2
+    fl2+=1
+    if fl2 == 1:
+        temp_bill = (ShreeCmt.get() * Shree_Cmt_Rate) + (RoofonCmt.get() * Roofoon_Cmt_Rate) + (
+                    chhar.get() * Chhar_Rate) + (
+                            gitti.get() * Gitti_Rate +(KonarkCmt.get() * Konark_Cmt_Rate) +(newRing.get() * Ring_Rate) +
+        (newWire.get() * Wire_Rate))
+        temp_dueAmt = temp_bill - PrePaid.get()
+        stmt = "UPDATE ShopRecord SET Shree_Cmt = Shree_Cmt+ {},Roofon_Cmt=Roofon_Cmt+{},Chhar=Chhar+{},Gitti=Gitti+{},TOTAL_BILL=TOTAL_BILL+{}, Pre_Paid=Pre_Paid+{},Due_Amount=Due_Amount+{},Konark_Cmt=Konark_Cmt+{},Ring=Ring+{},Wire=Wire+{} WHERE ID = {}".format(
+            ShreeCmt.get(), RoofonCmt.get(), chhar.get(), gitti.get(), temp_bill, PrePaid.get(), temp_dueAmt, KonarkCmt.get(),newRing.get(),newWire.get(),updateId.get())
+        cur.execute(stmt)
+        myDb.commit()
+
+        updateTime = dateTime()
+
+        naam = 'Naam'
+
+        if temp_dueAmt < 0:  #Incase if no any product is purchase and only pre_paid amt is paid
+            temp_dueAmt = 0.0
+        insertIntoCustomerKundli(updateId.get(),naam, ShreeCmt.get(), RoofonCmt.get(), chhar.get(),
+                                  gitti.get(), temp_bill, PrePaid.get(), temp_dueAmt, KonarkCmt.get(), newRing.get(),
+                                  newWire.get(), updateTime)
+
+
+
+
+
+
+        msg.showinfo("Done", "Record has Successfully Updated!! ")
+    else:
+        msg.showinfo("","This Record has already updated \n"
+                        "For Updating more click on 'Update Record'")
+
+
+
+
+def updateNegative():
+    global updateId
+    updateId.set(0)
+    top10 = Toplevel()
+    top10.title("Update Customer Record")
+    top10.geometry('950x100')
+    top10.configure(background='lightpink')
+    Label(top10, text=' Enter Customer ID for (-ve) Update: ', font="helvetica 20 bold").grid(row=0, pady=10, padx=10)
+    idEnt = Entry(top10, textvariable=updateId, font="arial 20 bold").grid(row=0, column=2, pady=10, padx=10)
+    Button(top10, text=" Update ", font="comicsansms 20 bold", fg='white', bg='green', command=showBeforeNegativeUpdate).grid(
+        row=0,
+        column=3)
+def showBeforeNegativeUpdate():
+    global ShreeCmt, RoofonCmt, chhar, gitti, PrePaid,newWire,KonarkCmt,newRing, fl2
+    ShreeCmt.set(0)
+    RoofonCmt.set(0)
+    KonarkCmt.set(0)
+    chhar.set(0.0)
+    gitti.set(0.0)
+    newRing.set(0.0)
+    newWire.set(0.0)
+    PrePaid.set(0.0)
+
+    fl2 = 0
+
+    stmt = "SELECT * from ShopRecord WHERE id={}".format(updateId.get())
+    cur.execute(stmt)
+    rec = cur.fetchall()
+    for recd in rec:
+        msg.showinfo(f"Current Status of ID No: {updateId.get()} is: ", f"Name: {recd[1]} \n"
+                                                                        f"PhoneNo: {recd[9]}\n\n"
+                                                                        f"Shree Cement: {recd[2]} \n"
+                                                                        f"Roofon Cement: {recd[3]} \n"
+                                                                        f"Konark Cement: {recd[10]}\n\n"
+                                                                        f"Chhar: {recd[4]}\n"
+                                                                        f"Gitti: {recd[5]} \n"
+                                                                        f"Ring: {recd[11]}\n"
+                                                                        f"Wire: {recd[12]}\n"
+                                                                        f"-----------------------\n"
+                                                                        f"Total Bill: {recd[6]} \n"
+                                                                        f"Pre-Paid Amount: {recd[7]} \n"
+                                                                        f"Due Amount: {recd[8]} \n")
+    top11 = Toplevel()
+    top11.title(f"Update Record of ID: {updateId.get()}")
+    top11.geometry("800x550")
+    top11.configure(background='lightpink')
+
+    Label(top11, text='Shree Cement (-):  ', font="helvetica 20 bold").grid(row=3, pady=10)
+    ShreeEnt = Entry(top11, textvariable=ShreeCmt, font="arial 20 bold").grid(row=3, column=2, pady=10)
+
+    Label(top11, text='Roofon Cement (-):  ', font="helvetica 20 bold").grid(row=4, pady=10)
+    RoofonEnt = Entry(top11, textvariable=RoofonCmt, font="arial 20 bold").grid(row=4, column=2, pady=10)
+
+    Label(top11, text='Konark Cement (-):  ', font="helvetica 20 bold").grid(row=5, pady=10)
+    ChharEnt = Entry(top11, textvariable=KonarkCmt, font="arial 20 bold").grid(row=5, column=2, pady=10)
+
+    Label(top11, text='Chhar (Kg -):  ', font="helvetica 20 bold").grid(row=6, pady=10)
+    GittiEnt = Entry(top11, textvariable=chhar, font="arial 20 bold").grid(row=6, column=2, pady=10)
+
+    Label(top11, text='Gitti (tiller -)', font="helvetica 20 bold").grid(row=7, pady=10)
+    GittiEnt = Entry(top11, textvariable=gitti, font="arial 20 bold").grid(row=7, column=2, pady=10)
+
+    Label(top11, text='Ring (kg -):  ', font="helvetica 20 bold").grid(row=8, pady=10)
+    GittiEnt = Entry(top11, textvariable=newRing, font="arial 20 bold").grid(row=8, column=2, pady=10)
+
+    Label(top11, text='Wire (kg -):  ', font="helvetica 20 bold").grid(row=9, pady=10)
+    GittiEnt = Entry(top11, textvariable=newWire, font="arial 20 bold").grid(row=9, column=2, pady=10)
+
+    Label(top11, text='Pre-Paid Amt (Rupees -):  ', font="helvetica 20 bold").grid(row=10, pady=10)
+    Pre_PaidEnt = Entry(top11, textvariable=PrePaid, font="arial 20 bold").grid(row=10, column=2, pady=10)
+    Button(top11, text="Update", font='comicsansms 17 bold', bg='green', fg='white', command=nowUpdateNegative).grid(row=11,
+                                                                                                            pady=10)
+def nowUpdateNegative():
+    global fl2
+    fl2 += 1
+    if fl2 == 1:
+        temp_bill = (ShreeCmt.get() * Shree_Cmt_Rate) + (RoofonCmt.get() * Roofoon_Cmt_Rate) + (
+                chhar.get() * Chhar_Rate) + (
+                            gitti.get() * Gitti_Rate) +(KonarkCmt.get() * Konark_Cmt_Rate)+(newRing.get()*Ring_Rate)+(wire.get()*Wire_Rate)
+        temp_dueAmt = temp_bill - PrePaid.get()
+        stmt = "UPDATE ShopRecord SET Shree_Cmt = Shree_Cmt- {},Roofon_Cmt=Roofon_Cmt-{},Chhar=Chhar-{},Gitti=Gitti-{},TOTAL_BILL=TOTAL_BILL-{}, Pre_Paid=Pre_Paid-{},Due_Amount=Due_Amount-{},Konark_Cmt=Konark_Cmt-{},Ring=Ring-{},Wire=Wire-{} WHERE ID = {}".format(
+            ShreeCmt.get(), RoofonCmt.get(), chhar.get(), gitti.get(), temp_bill, PrePaid.get(), temp_dueAmt, KonarkCmt.get(),newRing.get(),newWire.get(),
+            updateId.get())
+        cur.execute(stmt)
+        myDb.commit()
+
+        msg.showinfo("", "Record has Successfully Updated ")
+    else:
+        msg.showinfo("", "This Record has already updated \n"
+                         "For Updating more click on 'Update Record'")
+
+def deleteRecord():
+    top8 = Toplevel()
+    top8.title("Delete Customer By ID")
+    top8.geometry('900x80')
+    top8.configure(background='lightpink')
+    Label(top8, text=' Customer ID for Delete: ', font="helvetica 20 bold").grid(row=0, pady=10, padx=10)
+    idEnt = Entry(top8, textvariable=idForDelete, font="arial 20 bold").grid(row=0, column=2, pady=10, padx=10)
+    Button(top8, text=" Delete This ID", font="comicsansms 20 bold", fg='white', bg='orange', command=deleteThisId).grid(row=0,
+                                                                                                           column=3,padx=10)
+
+def deleteThisId():
+    global passWd
+    passWd.set("")
+    stmt = "SELECT * from ShopRecord WHERE id={}".format(idForDelete.get())
+    cur.execute(stmt)
+    rec = cur.fetchall()
+    for recd in rec:
+        msg.showinfo("Please Confirm Customer",f"Id: {recd[0]} \n"
+                                               f"Name: {recd[1]} \n"
+                                               f"PhoneNo: {recd[9]}\n\n"
+                                               f"Shree Cement: {recd[2]} \n"
+                                               f"Roofon Cement: {recd[3]} \n"
+                                               f"Konark Cement: {recd[10]}\n"
+                                               f"Chhar: {recd[4]} \n"
+                                               f"Gitti: {recd[5]} \n"
+                                               f"Ring: {recd[11]}\n"
+                                               f"Wire: {recd[12]}"
+                                               f"-----------------------\n"
+                                               f"Total Bill {recd[6]}\n"
+                                               f"Pre-Paid {recd[7]}\n"
+                                               f"Due-Amount {recd[8]}")
+    top9 = Toplevel()
+    top9.title("Security Check!")
+    top9.geometry("850x80")
+    top9.configure(background='lightpink')
+    Label(top9,text="Enter Password: ",font='helvetica 20 bold').grid(row=0,pady=10,padx=10)
+    Entry(top9,textvariable=passWd,font='arial 20 bold').grid(row=0,column=2,pady=10,padx=10)
+    Button(top9,text="Delete Now",font='comicsansms 20 bold',fg='white',bg='red',command=deleteNow).grid(row=0,column=3,padx=10)
+
+def deleteNow():
+    if passWd.get() == "5874dd":
+        stmt= "DELETE from ShopRecord WHERE ID = {}".format(idForDelete.get())
+        stmt2 = "DELETE from CustomerKundli WHERE ID = {}".format(idForDelete.get())
+        cur.execute(stmt)
+        cur.execute(stmt2)
+        myDb.commit()
+        msg.showinfo("Done",f" Record of ID No {idForDelete.get()} is Deleted")
+    else:
+        msg.showinfo('OOPs',"You Entered Wrong Password.\n Try Again")
+
+
+def insertToDatabase():
+    if Customer_Name.get() == "":
+        msg.showinfo("Alert!!","There can be no Record without \n Customer Name\n"
+                               "Please Enter Customer Name")
+
+    else:
+        global  fl1
+        fl1+=1
+        if fl1 == 1:
+            time = dateTime()
+            lis = []
+            values = []
+            lis.append(Customer_Name.get())
+
+            lis.append(Shree_Cmt.get())
+            lis.append(Roofon_Cmt.get())
+            lis.append(Chhar.get())
+            lis.append(Gitti.get())
+            totalBill = (Shree_Cmt.get() * Shree_Cmt_Rate) + (Roofon_Cmt.get() * Roofoon_Cmt_Rate) + (Konark_Cmt.get() * Konark_Cmt_Rate) +(wire.get() * Wire_Rate) + (ring.get() * Ring_Rate) + (Chhar.get() * Chhar_Rate) + (
+                    Gitti.get() * Gitti_Rate)
+            lis.append(totalBill)
+            lis.append(Pre_Paid.get())
+            Due_Amount = totalBill - Pre_Paid.get()
+            lis.append(Due_Amount)
+            lis.append(customer_Ph.get())
+            lis.append(Konark_Cmt.get())
+            lis.append(ring.get())
+            lis.append(wire.get())
+            lis.append(time)
+
+            tup = tuple(lis)
+            values.append(tup)
+            stmt = "INSERT into ShopRecord(Customer_Name,Shree_Cmt,Roofon_Cmt,Chhar,Gitti,TOTAL_BILL,Pre_Paid,Due_Amount,Customer_Ph,Konark_Cmt,Ring,Wire,DateTime) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+            cur.executemany(stmt, values)
+            myDb.commit()
+            #for customer kundli
+
+            stmt2 ="SELECT ID from ShopRecord WHERE Customer_Name = '{}'".format(Customer_Name.get())
+            cur.execute(stmt2)
+            iD = cur.fetchone()
+            thisID = iD[0]
+
+            insertIntoCustomerKundli(thisID,Customer_Name.get(),Shree_Cmt.get(),Roofon_Cmt.get(),Chhar.get(),Gitti.get(),totalBill,Pre_Paid.get(),Due_Amount,Konark_Cmt.get(),ring.get(),wire.get(),time)
+
+            msg.showinfo('Done','Record has Successfully Stored!')
+        else:
+            msg.showinfo('',"This Record has Already Stored in Computer\n"
+                            "For Adding a new Record Please \nClick on 'New Record'")
+
+def insertIntoCustomerKundli(id,name,shreeCmt,roofonCmt,chhar,gitti,totalVill,prePaid,DueAmt,konarkCmt,ring,wire,timee):
+
+    values2 = []
+
+    lis2 = []
+    lis2.append(id)
+    lis2.append(name)
+    lis2.append(shreeCmt)
+    lis2.append(roofonCmt)
+    lis2.append(chhar)
+    lis2.append(gitti)
+    lis2.append(totalVill)
+    lis2.append(prePaid)
+    lis2.append(DueAmt)
+    lis2.append(konarkCmt)
+    lis2.append(ring)
+    lis2.append(wire)
+    lis2.append(timee)
+
+
+    tup2 = tuple(lis2)
+    values2.append(tup2)
+    stmt3 = "INSERT into CustomerKundli (ID,Customer_Name,Shree_Cmt,Roofon_Cmt,Chhar,Gitti,TOTAL_BILL,Pre_Paid,Due_Amount,Konark_Cmt,Ring,Wire,DateTime) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    cur.executemany(stmt3, values2)
+    myDb.commit()
+
+
+def showinputid():
+    top2 = Toplevel()
+    top2.title(f"Details of Customer of Id No: {inputid.get()}")
+    top2.geometry('600x750')
+    listbox = Listbox(top2, font="helvetica 17 bold", bg='lightblue', relief=SUNKEN,
+                      height=50, width=100)
+    listbox.grid(padx=10, pady=10)
+
+    stmt = "SELECT * from ShopRecord WHERE id={}".format(inputid.get())
+    cur.execute(stmt)
+    rec = cur.fetchall()
+    for recd in rec:
+        listbox.insert(END,"")
+        listbox.insert(END,f"   ID No:  {recd[0]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"   Name:   {recd[1]}")
+        listbox.insert(END, "")
+        listbox.insert(END,f"   Date/Time:    {recd[13]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"   PhoneNo:    {recd[9]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"   Shree Cement:   {recd[2]}")
+        listbox.insert(END, "")
+        listbox.insert(END,f"   Roofon Cement:   {recd[3]}")
+        listbox.insert(END, "")
+        listbox.insert(END, f"   Konark Cement:    {recd[10]}")
+        listbox.insert(END, "")
+        listbox.insert(END,f"   Chhar:  {recd[4]}")
+        listbox.insert(END, "")
+        listbox.insert(END, f"   Ring:    {recd[11]}")
+        listbox.insert(END, "")
+        listbox.insert(END, f"   Wire:    {recd[12]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"   Gitti:   {recd[5]}")
+        listbox.insert(END, "----------------------------------------------------------------------")
+        listbox.insert(END,f"   Total Bill:   {recd[6]}")
+        listbox.insert(END, "")
+        listbox.insert(END,f"   Pre-Paid Amount:   {recd[7]}")
+        listbox.insert(END, "")
+        listbox.insert(END,f"   Due Amount:    {recd[8]}")
+        listbox.insert(END,f"")
+
+
+
+def fixRates():
+    top7 = Toplevel()
+    top7.title("Update the New Rates of Cement")
+    top7.geometry("900x500")
+    top7.configure(background='lightpink')
+    Label(top7).grid(row=0)
+    Label(top7,text=" New Rate of Shree Cement (per Bag):",font="helvetica 20 bold",).grid(row=1,padx=10,pady=10)
+    Entry(top7,textvariable=shreeNewRate,font="arial 20 bold",).grid(row=1,column=2,padx=10)
+
+    Label(top7, text=" New Rate of Roofon Cement (per Bag):", font="helvetica 20 bold", ).grid(row=2, padx=10, pady=10)
+    Entry(top7, textvariable=roofonNewRate, font="arial 20 bold", ).grid(row=2, column=2,padx=10)
+
+    Label(top7, text=" New Rate of Chhar (per Kg):", font="helvetica 20 bold", ).grid(row=3, padx=10, pady=10)
+    Entry(top7, textvariable=chharNewRate, font="arial 20 bold", ).grid(row=3, column=2,padx=10)
+
+    Label(top7, text=" New Rate of Gitti (per tiller):", font="helvetica 20 bold", ).grid(row=4, padx=10, pady=10)
+    Entry(top7, textvariable=gittiNewRate, font="arial 20 bold", ).grid(row=4, column=2,padx=10)
+
+    Label(top7, text=" New Rate of Konark Cement (per Bag):", font="helvetica 20 bold", ).grid(row=5, padx=10, pady=10)
+    Entry(top7, textvariable=konarkNewRate, font="arial 20 bold", ).grid(row=5, column=2, padx=10)
+
+    Label(top7, text=" New Rate of Ring (per Kg):", font="helvetica 20 bold", ).grid(row=6, padx=10, pady=10)
+    Entry(top7, textvariable=ringNewRate, font="arial 20 bold", ).grid(row=6, column=2, padx=10)
+
+    Label(top7, text=" New Rate of Wire (per Kg):", font="helvetica 20 bold", ).grid(row=7, padx=10, pady=10)
+    Entry(top7, textvariable=wireNewRate, font="arial 20 bold", ).grid(row=7, column=2, padx=10)
+
+    Button(top7,text="Reset Now",font='comicsansms 20 bold',bg='green',fg='white',command=rateFixNow).grid(row=8,padx=8,pady=10)
+
+
+def rateFixNow():
+    # Delete Old Rate Before Entering a new One
+    global fl3
+    fl3+=1
+    if fl3 == 1:
+        # fl3+=1
+        stment = "DELETE FROM CementRates WHERE Shree_Cmt_Rate = {}".format(oldRate)
+        cur.execute(stment)
+        myDb.commit()
+
+        lis=[]
+        lis.append(shreeNewRate.get())
+        lis.append(roofonNewRate.get())
+        lis.append(chharNewRate.get())
+        lis.append(gittiNewRate.get())
+        lis.append(konarkNewRate.get())
+        lis.append(ringNewRate.get())
+        lis.append(wireNewRate.get())
+
+        tupp = tuple(lis)
+        values = []
+        values.append(tupp)
+        stmt = "INSERT into CementRates(Shree_Cmt_Rate,Roofoon_Cmt_Rate,Chhar_Rate,Gitti_Rate,Konark_Cmt_Rate,Ring_Rate,Wire_Rate) VALUES(%s,%s,%s,%s,%s,%s,%s)"
+        cur.executemany(stmt, values)
+
+        myDb.commit()
+        pullOutRates() #for updating recent Rates
+        msg.showinfo("Done","New Rates are Successfully\n Saved in Computer")
+    else:
+        msg.showinfo("Hey,","New Rates are saved!,for changing again please click on 'Update New Rates' once again")
+def checkRates():
+    # print("ok")
+    q = msg.askquestion("Rates ",f"Shree Cement Rate: {Shree_Cmt_Rate} \n\n " 
+                                                                       f"Roofon Cement Rate: {Roofoon_Cmt_Rate} \n\n"
+                                                                     f"Chhar Rate: {Chhar_Rate} \n\n"
+                                                                    f"Gitti Rate: {Gitti_Rate}\n\n"
+                                                                    f"Konark Cement Rate: {Konark_Cmt_Rate}\n\n"
+                                                                    f"Ring Rate: {Ring_Rate}\n\n"
+                                                                    f"Wire Rate: {Wire_Rate}\n\n"
+                                                                     f"Do You Want to Change Rates?")
+    if q == 'yes':
+        fixRates()
+    else:
+        pass
+
+def customerActivity():
+    top14 = Toplevel()
+    top14.title("All Activities/ Kundli:")
+    top14.geometry('790x80')
+    top14.configure(background='lightpink')
+    Label(top14, text=' Customer ID for Kundli: ', font="helvetica 20 bold").grid(row=0, pady=10, padx=10)
+    idEnt = Entry(top14, textvariable=idForKundli, font="arial 20 bold").grid(row=0, column=2, pady=10, padx=10)
+    Button(top14, text=" OK ", font="comicsansms 20 bold", fg='white', bg='green', command=showKundli).grid(row=0,
+                                                                                                           column=3)
+
+
+def showKundli():
+    flg = 1
+    top15 = Toplevel()
+    top15.title("Whole Customers Record List")
+    top15.geometry('1500x1200')
+    listbox = Listbox(top15, font="helvetica 18 bold", bg='lightblue', relief=SUNKEN, height=100, width=500)
+    listbox.pack(fill='both')
+
+    listbox.insert(END, "")
+    stmt = "SELECT * FROM CustomerKundli WHERE ID ={}".format(idForKundli.get())
+    cur.execute(stmt)
+    file = cur.fetchall()
+    for data in file:
+        if flg == 1:
+            listbox.insert(END,f"                                                                                       All Activities of Mr {data[1]}  with ID {data[0]} are:-                                                                    ")
+            listbox.insert(END,"__________________________________________________________________________________________________________________________________________________")
+            flg+=1
+        listbox.insert(END,"")
+        listbox.insert(END,f"   Data/Time:  {data[12]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"    Shree Cement:  {data[2]}       |       Roofon Cement:  {data[3]}        |          Konark Cement:  {data[9]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"    Chhar:  {data[4]}       |      Gitti:  {data[5]}        |        Ring:  {data[10]}        |         Wire:  {data[11]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"    Total Bill:  {data[6]}         |         Pre-Paid:  {data[7]}        |         Due Amount:  {data[8]}")
+        listbox.insert(END,"")
+        listbox.insert(END,f"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+def backUP():
+    bckTime = dateTime()  #its type is of string
+    with open (f"{bckTime}.csv","a") as f:
+        stmt = "SELECT * FROM ShopRecord"
+        cur.execute(stmt)
+        dat = cur.fetchall()
+        storage = []
+
+        for data in dat:
+            storage.append(data)
+        siz = len(storage)
+        f.write(f"ID,Name,Shree Cement,Roofon Cement,Chhar,Gitti,Total Bill,Pre-Paid,Due-Amount,PhoneNo,Konark Cement,Ring,Wire,Date/Time\n")
+        while siz != 0:
+            recd = storage[siz - 1]
+
+            f.write(f"{recd[0]},{recd[1]},{recd[2]},{recd[3]},{recd[4]},{recd[5]},{recd[6]},{recd[7]},{recd[8]},{recd[9]},{recd[10]},{recd[11]},{recd[12]},{recd[13]}\n")
+            # f.write(f"+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
+            siz-=1
+        msg.showinfo("Done","Back Up has Generated\n Now you can copy to Pen Drive")
+
+
+#variables
+def contactKroHamse():
+    top15 = Toplevel()
+    top15.geometry('859x780')
+    top15.title('Contacts')
+    top15.configure(background='lightblue')
+    listbox = Listbox(top15, font="helvetica 17 bold", bg='lightblue', relief=SUNKEN,
+                      height=50, width=100)
+    listbox.grid(padx=10, pady=10)
+
+def aboutSoftware():
+    root2 = Tk()
+    root2.geometry('1500x1200')
+    root2.title("Help ?")
+
+    l1 =Label(root2,text='''
+    Hello User,this software is prepared for managing Shop Records \n Here are Some key features of this software:\n
+    1) New Record :-\nThis option is use for Adding a new Customer record in Computer.On Clicking this option a pop-up window
+    will appear which will confirm the current status of cement rates.
+      Then press 'OK'. Incase if you find the rates are not accurate,then You can an option to change for it. To change the Rates:-
+      You will find an orange button 'Update New Rates' on current Window click on this orange button,then it will
+      ask for New Rates of each and every products. Fill-up the new rates and then press the green button 'Reset Now'.
+      After this the new Rates will get stored into the Computer. Then You can enter a new customer record like his name,
+      his phone number, products he purchased. After then,press the green button 'Save Record' to save that record in the 
+      computer.It is as simple as eating pani-puri. After the record get saved in the cumputer,an unique ID will get allocted
+      to that particular customer,which can be use for many perpures as described below.\n
+    2) Calculation :-\n This button appears next to 'New Record' on main window.It has a feature of showing all the tranjections related to each and every customers.
+    It shows Customer Id, Customer Name, Total Bill , Pre-Paid Amount and Due Amount in horizontal manner.The most recent 
+    tranjection appears on the top.\n
+    3) View By Id:-\nThis Button appears next to 'Calculation' on main window.It has the feature of showing all the details
+    related to a paritcular customer.After being clicked it ask for customer ID. Enter customer ID and press 'Ok' button on same window
+    All the details related to customer of that ID will appear in form of a new window.\n
+    4)Update Record:-\nThis Button appears next to 'View By Id' on main window.It has the feature of updating customer record, on clicking to it. A new pop-up window
+    will appear which will ask for customer ID. \nYou have to enter the customer id in this pop-up,to whom you want to update. Then click on 'Update'. A new pop-up will appear,
+    it will show you the current status of the customer before update. If you are sure click on 'Ok'. After this,fill the product details which you want to add,then click on 
+    update.\n
+    4)All Activities:-\n
+    This Button appears next to 'Update Record' on main window.It has the feature of showing all the activities related to a particular customer including date and time.\n
+    At which time and date, what products the customer purchased including it's bill.\n
+    On clicking to this button, a pop-up will appear which will ask for customer ID.Enter the customer ID whose activities you want to see.\n
+
+    ''',bg="lightblue",fg="black",padx=23,pady=94,font="comicsansms 20 bold",
+	  borderwidth = 10,relief = SUNKEN)
+    l1.pack(fill=X,anchor="nw",padx=30,pady=35)
+    root2.mainloop()
+
+def userAccounts():
+    ques = msg.askquestion(f'Hi {userName}','Do You Want To Logout?')
+    if ques == 'yes':
+
+        root.destroy()
+        call(['python3', f'{path}'])
+if __name__ == '__main__':
+    pullOutRates()
+    path = '/home/abhishek/Gui/Using Thread.py'
+    Customer_Name = StringVar()
+    customer_Ph = IntVar()
+    Shree_Cmt = IntVar()
+    Konark_Cmt = IntVar()
+    Roofon_Cmt = IntVar()
+    Chhar = DoubleVar()
+    chhar10 = DoubleVar()
+    ring = DoubleVar()
+    wire = DoubleVar()
+    chhar12 = DoubleVar()
+    Gitti = DoubleVar()
+    Pre_Paid = DoubleVar()
+    inputid = IntVar()
+    updateId = IntVar()
+    idForKundli = IntVar()
+    # variables for update the record
+    ShreeCmt = IntVar()
+    RoofonCmt = IntVar()
+    KonarkCmt = IntVar()
+    chhar = DoubleVar()
+    gitti = DoubleVar()
+    PrePaid = DoubleVar()
+    newWire = DoubleVar()
+    newRing = DoubleVar()
+    #variables for updating cement rates
+    shreeNewRate = DoubleVar()
+    roofonNewRate = DoubleVar()
+    chharNewRate = DoubleVar()
+    gittiNewRate = DoubleVar()
+    konarkNewRate = DoubleVar()
+    ringNewRate = DoubleVar()
+    wireNewRate = DoubleVar()
+
+    idForDelete = IntVar()
+    passWd = StringVar()
+    #flags
+    fl1 = 0
+    fl2 = 0
+    fl3 = 0
+
+
+
+
+    #Buttons for different tasks
+    menubar = Menu(root,font="helvetica 20 bold",fg='white',bg='purple')
+    menubar.add_command(label=" New Record ",command=addNew)
+    # menubar.add_separator()
+    menubar.add_command(label=" Calculation ",command=totalBillDueAmt)
+    # menubar.add_separator()
+    menubar.add_command(label=" View By ID ",command=viewByID)
+    menubar.add_command(label=" View Total Record ",command=viewAll)
+    menubar.add_command(label=" Update Record ",command=update)
+    menubar.add_command(label=" All Activities ",command=customerActivity)
+
+    m1 = Menu(menubar,tearoff=0,font="helvetica 17 italic",fg='white',bg='purple')
+    m1.add_separator()
+    m1.add_command(label = f' User:- {userName} ',command = userAccounts)
+    m1.add_separator()
+    m1.add_command(label=' Check Rates ',command=checkRates)
+    m1.add_separator()
+    m1.add_command(label=' Update Negative ',command=updateNegative)
+    m1.add_separator()
+    m1.add_command(label=' Help ?',command=aboutSoftware)
+    m1.add_separator()
+    m1.add_command(label=' Contact Developer ',command= contactKroHamse)
+    m1.add_separator()
+    m1.add_command(label=' Delete Record',command=deleteRecord)
+    m1.add_separator()
+    m1.add_command(label=' Backup Data',command=backUP)
+    m1.add_separator()
+
+    m1.add_command(label=' Quit/Close',command=root.destroy)
+
+
+    root.config(menu=menubar)
+    menubar.add_cascade(label='Advance Features', menu=m1)
+
+
+
+
+
+root.config(menu=menubar)
+root.mainloop()
